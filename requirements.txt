@@ -4,7 +4,8 @@ python-multipart
 pillow
 torch         # comment out if not using PyTorch
 numpy
-tensorflow==2.15.0
-keras==2.15.0
+keras==3.2.0
+tensorflow==2.16.1
+
 
 
