@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from app.router import route_prediction
-from app.load_models import load_all_models
+from app.load_models import load_all_models, MODELS
 
 app = FastAPI()
 
