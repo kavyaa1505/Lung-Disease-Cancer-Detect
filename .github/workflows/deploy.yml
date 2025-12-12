@@ -12,17 +12,29 @@ jobs:
     steps:
     - name: Checkout deployment branch
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Checkout main branch (models)
       uses: actions/checkout@v3
       with:
         ref: main
         path: ml_branch
+        fetch-depth: 0
 
-    - name: Copy models
+    - name: Copy models from main to deployment
       run: |
         mkdir -p ml_models/models
-        cp ml_branch/models/* ml_models/models/
+        cp -r ml_branch/models/* ml_models/models/ || echo "No models found to copy"
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add ml_models/models
+        git commit -m "Updated models from main branch" || echo "No changes to commit"
+
+    - name: Push updated models to deployment branch
+      run: |
+        git push origin deployment
 
     - name: Trigger Render Deploy
       run: |
