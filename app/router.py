@@ -1,25 +1,15 @@
-from fastapi import UploadFile
+from fastapi import HTTPException
 from app.load_models import MODELS
-from app.preprocess import preprocess_image
 
-async def route_prediction(file: UploadFile):
-    filename = file.filename.lower()
-    image = await preprocess_image(file)
-
-    # Basic routing logic
-    if "xray" in filename:
-        model = MODELS.get("xray_model.pkl")
-    elif "ct" in filename:
-        model = MODELS.get("ct_model.pkl")
-    else:
-        return {"error": "Filename must include either 'xray' or 'ct'"}
-
-    if model is None:
-        return {"error": "Required model not found on server."}
-
-    # For sklearn models
+async def route_prediction(text: str):
     try:
-        prediction = model.predict([image])
-        return {"prediction": prediction[0]}
-    except:
-        return {"error": "Prediction failed. Model may require PyTorch logic."}
+        model = MODELS.get("tokenizer")  # or your actual model name
+        if model is None:
+            raise HTTPException(status_code=500, detail="Model not loaded")
+
+        # Predict using the ML model
+        prediction = model.predict([text])[0]  
+        return {"prediction": str(prediction)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
