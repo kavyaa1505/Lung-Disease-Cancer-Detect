@@ -1,1 +1,29 @@
+name: Deploy to Render
 
+on:
+  push:
+    branches:
+      - deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout deployment branch
+      uses: actions/checkout@v3
+
+    - name: Checkout main branch (models)
+      uses: actions/checkout@v3
+      with:
+        ref: main
+        path: ml_branch
+
+    - name: Copy models
+      run: |
+        mkdir -p ml_models/models
+        cp ml_branch/models/* ml_models/models/
+
+    - name: Trigger Render Deploy
+      run: |
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
