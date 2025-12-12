@@ -6,7 +6,7 @@ on:
       - deployment
 
 permissions:
-  contents: write  
+  contents: write
 
 jobs:
   deploy:
@@ -20,23 +20,21 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: main
-        path: ml_branch
+        path: main_branch
 
-    - name: Copy models from main to deployment
+    - name: Copy models from main → deployment
       run: |
-        mkdir -p ml_models
-        cp -r ml_branch/models/* ml_models/ || echo "No model files found in main/models"
-        
+        mkdir -p ml_models/models
+        cp -r main_branch/models/* ml_models/models/
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
+        git add ml_models/models
+        git commit -m "Synced models from main branch" || echo "No changes to commit"
 
-        git add ml_models || echo "Nothing to add"
-        git commit -m "Updated models from main branch" || echo "No changes to commit"
-
-    - name: Push updated models to deployment branch
+    - name: Push updated model files to deployment branch
       run: |
         git push origin deployment
 
-    - name: Trigger Render Deploy
+    - name: Trigger Render Deployment
       run: |
         curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
